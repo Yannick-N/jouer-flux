@@ -11,3 +11,6 @@ def create_firewall(data):
     db.session.add(firewall)
     db.session.commit()
     return firewall
+
+def get_firewall(firewall_id):
+    return db.session.get(Firewall, firewall_id)
