@@ -22,7 +22,7 @@ def create_app(config_name=None):
     db.init_app(app)
 
     from app.routes.firewall_route import firewall_bp
-    app.register_blueprint(firewall_bp)
+    app.register_blueprint(firewall_bp, url_prefix='/api/firewalls')
 
     with app.app_context():
         from .models.firewall import Firewall
