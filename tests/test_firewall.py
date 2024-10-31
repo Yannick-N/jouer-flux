@@ -44,22 +44,29 @@ def test_get_firewall(client):
 def test_update_firewall(client):
     response = client.post(BASE_URL, json={
         'name': 'Test Firewall',
-        'description': 'A firewall for testing purposes'
+        'description': 'A firewall for testing purposes',
+        'ip_address': '192.168.1.1'
     })
     firewall_id = response.get_json()['id']
     
-    response = client.put(f'{BASE_URL}{firewall_id}', json={
+    response = client.post(f'{BASE_URL}{firewall_id}', json={
         'name': 'Updated Firewall',
-        'description': 'Updated description'
+        'description': 'Updated description',
+        'ip_address': '192.168.1.2'
     })
+    
     assert response.status_code == 200
     data = response.get_json()
     assert data['name'] == 'Updated Firewall'
+    assert data['description'] == 'Updated description'
+    assert data['ip_address'] == '192.168.1.2'
 
 def test_delete_firewall(client):
     response = client.post(BASE_URL, json={
         'name': 'Test Firewall',
-        'description': 'A firewall for testing purposes'
+        'description': 'A firewall for testing purposes',
+        'ip_address': '192.168.1.1'
+
     })
     firewall_id = response.get_json()['id']
     
