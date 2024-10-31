@@ -9,7 +9,7 @@ class Policy(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.datetime.now)
     updated_at = db.Column(db.DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)
     status = db.Column(db.String(20), default='active')
-    rules = db.relationship('Rule', backref='policy', lazy=True)
+    rules = db.relationship('Rule', backref='policy', lazy=True, cascade="all")
 
     def __repr__(self):
         return f'<Policy {self.name}>'

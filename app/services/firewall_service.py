@@ -20,6 +20,10 @@ def create_firewall(data):
     db.session.commit()
     return firewall
 
+def get_firewalls():
+    firewalls = db.session.query(Firewall).all()
+    return firewalls
+
 def get_firewall(firewall_id):
     return db.session.get(Firewall, firewall_id)
 

@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from app.services.firewall_service import create_firewall, get_firewall, update_firewall, delete_firewall
+from app.services.firewall_service import create_firewall, get_firewalls, get_firewall, update_firewall, delete_firewall
 
 firewall_bp = Blueprint('firewall', __name__)
 
@@ -11,6 +11,14 @@ def handle_create_firewall():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
+@firewall_bp.route('/', methods=['GET'])
+def handle_get_firewalls():
+    try:
+        firewalls = get_firewalls()
+        return jsonify([firewall.to_dict() for firewall in firewalls]), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 @firewall_bp.route('/<int:id>', methods=['GET'])
 def handle_get_firewall(id):
     try:
