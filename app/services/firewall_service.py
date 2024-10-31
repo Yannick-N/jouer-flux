@@ -36,3 +36,11 @@ def update_firewall(firewall_id, data):
     db.session.commit()
     
     return firewall
+
+def delete_firewall(firewall_id):
+    firewall = db.session.get(Firewall, firewall_id)
+    if not firewall:
+        raise ValueError("Firewall not found")
+    
+    db.session.delete(firewall)
+    db.session.commit()

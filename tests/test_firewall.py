@@ -66,7 +66,6 @@ def test_delete_firewall(client):
         'name': 'Test Firewall',
         'description': 'A firewall for testing purposes',
         'ip_address': '192.168.1.1'
-
     })
     firewall_id = response.get_json()['id']
     
