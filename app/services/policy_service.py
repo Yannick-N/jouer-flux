@@ -1,13 +1,22 @@
+from marshmallow import ValidationError
 from app import db
 from app.models.policy import Policy
 from app.models.firewall import Firewall
+from app.schemas.policy_schema import PolicySchema
+
+policy_schema = PolicySchema()
 
 def create_policy(data):
+    try:
+        validated_data = policy_schema.load(data)
+    except ValidationError as err:
+        raise ValueError({"error": err.messages})
+
     firewall = db.session.get(Firewall, data['firewall_id'])
     if not firewall:
         raise ValueError(f"Firewall with ID {data['firewall_id']} does not exist.")
     
-    status = data.get('status', 'active')
+    status = validated_data.get('status', 'active')
     if status not in ['active', 'inactive']:
         raise ValueError("Invalid status. Must be either 'active' or 'inactive'.")
     
@@ -16,10 +25,9 @@ def create_policy(data):
         raise ValueError(f"A policy with the name '{data['name']}' already exists for this firewall.")
     
     policy = Policy(
-        name=data['name'],
-        firewall_id=data['firewall_id'],
+        name=validated_data['name'],
+        firewall_id=validated_data['firewall_id'],
         status=status,
-        rules=data.get('rules', [])
     )
     db.session.add(policy)
     db.session.commit()

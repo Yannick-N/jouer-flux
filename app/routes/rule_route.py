@@ -5,8 +5,13 @@ rule_bp = Blueprint('rules', __name__)
 
 @rule_bp.route('/', methods=['POST'])
 def handle_create_rule():
-    rule = create_rule(request.get_json())
-    return jsonify(rule.to_dict()), 201
+    try:
+        rule = create_rule(request.get_json())
+        return jsonify(rule.to_dict()), 201
+    except ValueError as ve:
+        return jsonify(ve.args[0]), 400
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @rule_bp.route('/<int:rule_id>', methods=['GET'])
 def handle_get_rule(rule_id):

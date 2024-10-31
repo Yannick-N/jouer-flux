@@ -1,16 +1,25 @@
+from marshmallow import ValidationError
 from app.models.policy import Policy
 from app.models.rule import Rule
 from app import db
+from app.schemas.rule_schema import RuleSchema
+
+rule_schema = RuleSchema()
 
 def create_rule(data):
+    try:
+        validated_data = rule_schema.load(data)
+    except ValidationError as err:
+        raise ValueError({"error": err.messages})
+
     policy = db.session.get(Policy, data['policy_id'])
     if not policy:
         raise ValueError(f"Policy with ID {data['policy_id']} does not exist.")
 
     rule = Rule(
-        policy_id=data['policy_id'],
-        destination_ip=data.get('destination_ip'),
-        protocol=data.get('protocol')
+        policy_id=validated_data['policy_id'],
+        destination_ip=validated_data.get('destination_ip'),
+        protocol=validated_data.get('protocol')
     )
     db.session.add(rule)
     db.session.commit()

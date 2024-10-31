@@ -8,6 +8,8 @@ def handle_create_firewall():
     try:
         firewall = create_firewall(request.get_json())
         return jsonify(firewall.to_dict()), 201
+    except ValueError as ve:
+        return jsonify(ve.args[0]), 400
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
