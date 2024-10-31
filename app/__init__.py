@@ -27,6 +27,9 @@ def create_app(config_name=None):
     from app.routes.policy_route import policy_bp
     app.register_blueprint(policy_bp, url_prefix='/api/policies')
 
+    from app.routes.rule_route import rule_bp
+    app.register_blueprint(rule_bp, url_prefix='/api/rules')
+
     with app.app_context():
         from .models.firewall import Firewall
         from .models.policy import Policy
