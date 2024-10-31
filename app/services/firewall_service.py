@@ -2,6 +2,14 @@ from app import db
 from app.models.firewall import Firewall
 
 def create_firewall(data):
+    existing_firewall_by_name = db.session.query(Firewall).filter_by(name=data['name']).first()
+    if existing_firewall_by_name:
+        raise ValueError(f"A firewall with the name '{data['name']}' already exists.")
+    
+    existing_firewall_by_ip = db.session.query(Firewall).filter_by(ip_address=data['ip_address']).first()
+    if existing_firewall_by_ip:
+        raise ValueError(f"A firewall with the IP address '{data['ip_address']}' already exists.")
+    
     firewall = Firewall(
         name=data['name'],
         description=data['description'],
