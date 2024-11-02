@@ -32,8 +32,8 @@ def create_app(config_name=None):
     from app.routes.rule_route import rule_bp
 
     app.register_blueprint(firewall_bp, url_prefix=f"{API_VERSION}/firewalls")
-    app.register_blueprint(policy_bp, url_prefix=f"{API_VERSION}/firewalls/<int:firewall_id>/policies")
-    app.register_blueprint(rule_bp, url_prefix=f"{API_VERSION}/firewalls/<int:firewall_id>/policies/<int:policy_id>/rules")
+    app.register_blueprint(policy_bp, url_prefix=f"{API_VERSION}/firewalls")
+    app.register_blueprint(rule_bp, url_prefix=f"{API_VERSION}/firewalls")
 
 
     with app.app_context():

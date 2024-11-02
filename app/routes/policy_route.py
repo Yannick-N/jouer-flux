@@ -33,7 +33,6 @@ def handle_get_policies(firewall_id):
 @policy_bp.route('<int:firewall_id>/policies/<int:policy_id>', methods=['POST'])
 def handle_update_policy(firewall_id, policy_id):
     try:
-
         validated_data = policy_schema.load(request.get_json())
         validated_data["firewall_id"] = firewall_id
         validated_data["policy_id"] = policy_id

@@ -1,37 +1,38 @@
-from marshmallow import ValidationError
+from app.models.firewall import Firewall
 from app.models.policy import Policy
 from app.models.rule import Rule
 from app import db
-from app.schemas.rule_schema import RuleSchema
 
-rule_schema = RuleSchema()
 
 def create_rule(data):
-    try:
-        validated_data = rule_schema.load(data)
-    except ValidationError as err:
-        raise ValueError({"error": err.messages})
-
+    firewall = db.session.get(Firewall, data['firewall_id'])
+    if not firewall:
+        raise ValueError(f"Firewall with ID {policy.firewall_id} does not exist for the given policy.")
+    
     policy = db.session.get(Policy, data['policy_id'])
     if not policy:
         raise ValueError(f"Policy with ID {data['policy_id']} does not exist.")
 
+    
+    if not data.get('destination_ip') or not data.get('protocol'):
+        raise ValueError("Destination IP and protocol are required.")
+
     rule = Rule(
-        policy_id=validated_data['policy_id'],
-        destination_ip=validated_data.get('destination_ip'),
-        protocol=validated_data.get('protocol')
+        policy_id=data['policy_id'],
+        destination_ip=data.get('destination_ip'),
+        protocol=data.get('protocol')
     )
     db.session.add(rule)
     db.session.commit()
     return rule
 
-def get_rule(rule_id):
-    return db.session.get(Rule, rule_id)
+def get_rules_of_policy(policy_id):
+    return Rule.query.filter_by(policy_id=policy_id).all()
 
-def update_rule(rule_id, data):
-    rule = db.session.get(Rule, rule_id)
+def update_rule(data):
+    rule = db.session.get(Rule, data['rule_id'])
     if not rule:
-        raise ValueError(f"Rule with ID {rule_id} does not exist.")
+        raise ValueError(f"Rule with ID {data['rule_id']} does not exist.")
 
     rule.destination_ip = data.get('destination_ip', rule.destination_ip)
     rule.protocol = data.get('protocol', rule.protocol)
