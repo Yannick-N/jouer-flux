@@ -1,18 +1,23 @@
 from flask import Blueprint, jsonify, request
+from marshmallow import ValidationError
+from app.schemas.firewall_schema import FirewallSchema
 from app.services.firewall_service import create_firewall, get_firewalls, get_firewall, update_firewall, delete_firewall
+
+firewall_schema = FirewallSchema()
 
 firewall_bp = Blueprint('firewall', __name__)
 
 @firewall_bp.route('/', methods=['POST'])
 def handle_create_firewall():
     try:
-        firewall = create_firewall(request.get_json())
+        validated_data = firewall_schema.load(request.get_json())
+        firewall = create_firewall(validated_data)
         return jsonify(firewall.to_dict()), 201
-    except ValueError as ve:
-        return jsonify(ve.args[0]), 400
+    except ValidationError as err:
+        return jsonify({"error": err.messages})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-    
+
 @firewall_bp.route('/', methods=['GET'])
 def handle_get_firewalls():
     try:

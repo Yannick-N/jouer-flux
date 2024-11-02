@@ -1,16 +1,7 @@
-from marshmallow import ValidationError
 from app import db
 from app.models.firewall import Firewall
-from app.schemas.firewall_schema import FirewallSchema
-
-firewall_schema = FirewallSchema()
 
 def create_firewall(data):
-    try:
-        validated_data = firewall_schema.load(data)
-    except ValidationError as err:
-        raise ValueError({"error": err.messages})
-    
     existing_firewall_by_name = db.session.query(Firewall).filter_by(name=data['name']).first()
     if existing_firewall_by_name:
         raise ValueError(f"A firewall with the name '{data['name']}' already exists.")
@@ -20,9 +11,9 @@ def create_firewall(data):
         raise ValueError(f"A firewall with the IP address '{data['ip_address']}' already exists.")
     
     firewall = Firewall(
-        name=validated_data['name'],
-        description=validated_data.get('description', ''),
-        ip_address=validated_data['ip_address']
+        name=data['name'],
+        description=data.get('description', ''),
+        ip_address=data['ip_address']
     )
     db.session.add(firewall)
     db.session.commit()
