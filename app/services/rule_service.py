@@ -29,6 +29,12 @@ def create_rule(data):
 def get_rules_of_policy(policy_id):
     return Rule.query.filter_by(policy_id=policy_id).all()
 
+def get_rule(rule_id):
+    rule = db.session.get(Rule, rule_id)
+    if not rule:
+        raise ValueError(f"Rule with ID {rule_id} does not exist.")
+    return rule
+
 def update_rule(data):
     rule = db.session.get(Rule, data['rule_id'])
     if not rule:

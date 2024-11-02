@@ -1,7 +1,7 @@
 import pytest
 from app import create_app, db
 
-BASE_URL = '/api/rules/'
+BASE_URL = '/api/v1/firewalls/'
 
 @pytest.fixture
 def app():
@@ -16,7 +16,7 @@ def client(app):
     return app.test_client()
 
 def create_test_firewall(client):
-    response = client.post('/api/firewalls/', json={
+    response = client.post(BASE_URL, json={
         'name': 'Test Firewall',
         'description': 'A firewall for testing purposes',
         'ip_address': '192.168.1.1'
@@ -24,9 +24,8 @@ def create_test_firewall(client):
     return response.get_json()['id']
 
 def create_test_policy(client, firewall_id):
-    response = client.post('/api/policies/', json={
+    response = client.post(f'{BASE_URL}{firewall_id}/policies', json={
         'name': 'Test Policy',
-        'firewall_id': firewall_id,
         'status': 'active'
     })
     return response.get_json()['id']
@@ -34,9 +33,8 @@ def create_test_policy(client, firewall_id):
 def test_create_rule(client):
     firewall_id = create_test_firewall(client)
     policy_id = create_test_policy(client, firewall_id)
-    
-    response = client.post(BASE_URL, json={
-        'policy_id': policy_id,
+
+    response = client.post(f'{BASE_URL}{firewall_id}/policies/{policy_id}/rules', json={
         'destination_ip': '10.0.0.5',
         'protocol': 'TCP'
     })
@@ -51,15 +49,15 @@ def test_create_rule(client):
 def test_get_rule(client):
     firewall_id = create_test_firewall(client)
     policy_id = create_test_policy(client, firewall_id)
-    
-    response = client.post(BASE_URL, json={
-        'policy_id': policy_id,
+
+    response = client.post(f'{BASE_URL}{firewall_id}/policies/{policy_id}/rules', json={
         'destination_ip': '10.0.0.5',
         'protocol': 'UDP'
     })
     rule_id = response.get_json()['id']
-    
-    response = client.get(f'{BASE_URL}{rule_id}')
+
+    response = client.get(f'{BASE_URL}{firewall_id}/policies/{policy_id}/rules/{rule_id}')
+    print(f"RESPONSE =>> {response.get_data()}")
     assert response.status_code == 200
     data = response.get_json()
     assert data['id'] == rule_id
@@ -70,19 +68,17 @@ def test_get_rule(client):
 def test_update_rule(client):
     firewall_id = create_test_firewall(client)
     policy_id = create_test_policy(client, firewall_id)
-    
-    response = client.post(BASE_URL, json={
-        'policy_id': policy_id,
+
+    response = client.post(f'{BASE_URL}{firewall_id}/policies/{policy_id}/rules', json={
         'destination_ip': '10.0.0.5',
         'protocol': 'TCP'
     })
     rule_id = response.get_json()['id']
-    
-    response = client.put(f'{BASE_URL}{rule_id}', json={
+
+    response = client.post(f'{BASE_URL}{firewall_id}/policies/{policy_id}/rules/{rule_id}', json={
         'destination_ip': '10.0.0.10',
         'protocol': 'ICMP'
     })
-    
     assert response.status_code == 200
     data = response.get_json()
     assert data['destination_ip'] == '10.0.0.10'
@@ -91,16 +87,15 @@ def test_update_rule(client):
 def test_delete_rule(client):
     firewall_id = create_test_firewall(client)
     policy_id = create_test_policy(client, firewall_id)
-    
-    response = client.post(BASE_URL, json={
-        'policy_id': policy_id,
+
+    response = client.post(f'{BASE_URL}{firewall_id}/policies/{policy_id}/rules', json={
         'destination_ip': '10.0.0.5',
         'protocol': 'UDP'
     })
     rule_id = response.get_json()['id']
-    
-    response = client.delete(f'{BASE_URL}{rule_id}')
+
+    response = client.delete(f'{BASE_URL}{firewall_id}/policies/{policy_id}/rules/{rule_id}')
     assert response.status_code == 204  
-    
-    response = client.get(f'{BASE_URL}{rule_id}')
+
+    response = client.get(f'{BASE_URL}{firewall_id}/policies/{policy_id}/rules/{rule_id}')
     assert response.status_code == 404

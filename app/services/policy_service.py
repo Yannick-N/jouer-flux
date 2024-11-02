@@ -27,6 +27,12 @@ def create_policy(data):
 def get_policies_of_firewall(firewall_id):
     return Policy.query.filter_by(firewall_id=firewall_id).all()
 
+def get_policy(firewall_id, policy_id):
+    policy = db.session.query(Policy).filter_by(id=policy_id, firewall_id=firewall_id).first()
+    if not policy:
+        raise ValueError(f"Policy with ID {policy_id} does not exist for this firewall.")
+    return policy
+
 def update_policy(data):
     policy = db.session.get(Policy, data["policy_id"])
     new_name = data.get('name', policy.name)

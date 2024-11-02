@@ -1,7 +1,7 @@
 import pytest
 from app import create_app, db
 
-BASE_URL = '/api/firewalls/'
+BASE_URL = '/api/v1/firewalls/'
 
 @pytest.fixture
 def app():
@@ -73,3 +73,30 @@ def test_delete_firewall(client):
     
     response = client.get(f'{BASE_URL}{firewall_id}')
     assert response.status_code == 404  
+
+def test_create_firewall_duplicate_name(client):
+    client.post(BASE_URL, json={
+        'name': 'Duplicate Firewall',
+        'description': 'A firewall for testing purposes',
+        'ip_address': '192.168.1.1'
+    })
+    response = client.post(BASE_URL, json={
+        'name': 'Duplicate Firewall',
+        'description': 'A second firewall with the same name',
+        'ip_address': '192.168.1.2'
+    })
+    print(response.get_data())
+    assert response.status_code == 500 
+
+def test_create_firewall_duplicate_ip(client):
+    client.post(BASE_URL, json={
+        'name': 'Unique Firewall',
+        'description': 'A firewall with a unique IP',
+        'ip_address': '192.168.1.3'
+    })
+    response = client.post(BASE_URL, json={
+        'name': 'Another Firewall',
+        'description': 'A firewall with a duplicate IP',
+        'ip_address': '192.168.1.3'
+    })
+    assert response.status_code == 500  

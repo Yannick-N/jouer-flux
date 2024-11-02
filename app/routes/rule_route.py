@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, request
 from marshmallow import ValidationError
 from app.schemas.rule_schema import RuleSchema
-from app.services.rule_service import create_rule, get_rules_of_policy, update_rule, delete_rule
+from app.services.rule_service import create_rule, get_rules_of_policy, get_rule, update_rule, delete_rule
 
 rule_schema = RuleSchema()
 
@@ -29,6 +29,14 @@ def handle_get_rule(firewall_id, policy_id):
         return jsonify([rule.to_dict() for rule in rules]), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+@rule_bp.route('/<int:firewall_id>/policies/<int:policy_id>/rules/<int:rule_id>', methods=['GET'])
+def get_rule_route(firewall_id, policy_id, rule_id):
+    try:
+        rule = get_rule(rule_id)
+        return jsonify(rule.to_dict()), 200
+    except ValueError as e:
+        return jsonify({'error': str(e)}), 404 
 
 @rule_bp.route('/<int:firewall_id>/policies/<int:policy_id>/rules/<int:rule_id>', methods=['POST'])
 def handle_update_rule(firewall_id, policy_id, rule_id):

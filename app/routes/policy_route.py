@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, request
 from marshmallow import ValidationError
 from app.schemas.policy_schema import PolicySchema
-from app.services.policy_service import create_policy, get_policies_of_firewall, update_policy, delete_policy
+from app.services.policy_service import create_policy, get_policies_of_firewall, get_policy, update_policy, delete_policy
 
 policy_schema = PolicySchema()
 
@@ -29,6 +29,15 @@ def handle_get_policies(firewall_id):
     except ValueError as e:
         return jsonify({'error': str(e)}), 404
 
+@policy_bp.route('<int:firewall_id>/policies/<int:policy_id>', methods=['GET'])
+def handle_get_policy(firewall_id, policy_id):
+    try:
+        policy = get_policy(firewall_id, policy_id)
+        return jsonify(policy.to_dict()), 200
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 404
+    except Exception as e:
+        return jsonify({"error": "An unexpected error occurred."}), 500
 
 @policy_bp.route('<int:firewall_id>/policies/<int:policy_id>', methods=['POST'])
 def handle_update_policy(firewall_id, policy_id):
