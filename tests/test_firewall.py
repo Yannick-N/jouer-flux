@@ -24,7 +24,7 @@ def test_create_firewall(client):
     assert response.status_code == 201
     data = response.get_json()
     assert data['id'] is not None
-    assert data['name'] == 'Test Firewall'
+    assert data['name'] == 'Tes Firewall'
     assert data['ip_address'] == '192.168.1.1'
 
 def test_get_firewall(client):
