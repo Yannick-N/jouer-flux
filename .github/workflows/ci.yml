@@ -3,13 +3,13 @@ name: CI
 on:
   push:
     branches:
-      - main 
+      - main
   pull_request:
     branches:
-      - main 
+      - main
 
 jobs:
-  build-and-test:
+  test:
     runs-on: ubuntu-latest
 
     steps:
@@ -19,12 +19,22 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: '3.9'
+          python-version: '3.10'
 
-      - name: Build Docker image
-        run: |
-          docker build -t my-flask-app .
+      - name: Cache pip
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
 
-      - name: Run tests in Docker
+      - name: Install dependencies
         run: |
-          docker run --rm my-flask-app pytest --maxfail=1 --disable-warnings -q
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Build and test with Docker
+        run: |
+          docker build -t flask_app_test .
+          docker run flask_app_test
