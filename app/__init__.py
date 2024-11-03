@@ -4,6 +4,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_security import Security, SQLAlchemyUserDatastore
 from flask_jwt_extended import JWTManager
+from werkzeug.security import generate_password_hash
 
 from dotenv import load_dotenv
 from config import ProdConfig, TestConfig
@@ -31,6 +32,22 @@ def create_app(config_name=None):
     user_datastore = SQLAlchemyUserDatastore(db, User, Role)
     Security(app, user_datastore)
 
+    with app.app_context():
+        db.create_all() 
+        if not user_datastore.find_role("admin"):
+            user_datastore.create_role(name="admin", description="Admin Role")
+        if not user_datastore.find_role("user"):
+            user_datastore.create_role(name="user", description="User Role")
+        if not user_datastore.find_user(email="admin@example.com"):
+            user_datastore.create_user(
+                email="admin@example.com",
+                password=generate_password_hash("password", method='pbkdf2:sha256'),
+                roles=["admin"],
+                fs_uniquifier="admin@example.com"
+            )
+        db.session.commit()
+        print("Database initialized and default user created.")
+
     from app.routes.firewall_route import firewall_bp
     from app.routes.policy_route import policy_bp    
     from app.routes.rule_route import rule_bp
@@ -40,6 +57,6 @@ def create_app(config_name=None):
     app.register_blueprint(firewall_bp, url_prefix=f"{API_VERSION}/firewalls")
     app.register_blueprint(policy_bp, url_prefix=f"{API_VERSION}/firewalls")
     app.register_blueprint(rule_bp, url_prefix=f"{API_VERSION}/firewalls")
-    app.register_blueprint(user_bp, url_prefix=f"{API_VERSION}/user")
+    app.register_blueprint(user_bp, url_prefix=f"{API_VERSION}/users")
 
     return app
