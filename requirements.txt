@@ -8,3 +8,4 @@ marshmallow
 Flask-Login
 Flask-Security
 Flask-JWT-Extended
+pytest-mock

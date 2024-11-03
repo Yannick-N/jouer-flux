@@ -20,7 +20,23 @@ def create_app(config_name=None):
         config_name = os.getenv('FLASK_ENV', 'prod')
 
     app = Flask(__name__)
-    swagger = Swagger(app)
+    swagger = Swagger(app, template={
+        "swagger": "2.0",
+        "info": {
+            "title": "Firewall API",
+            "description": "API for managing firewalls and users",
+            "version": "1.0"
+        },
+        "securityDefinitions": {
+            "Bearer": {
+                "type": "apiKey",
+                "name": "Authorization",
+                "in": "header",
+                "description": "JWT Authorization header using the Bearer scheme. Example: 'Bearer {token}'"
+            }
+        },
+        "security": [{"Bearer": []}]
+    })
 
     if config_name == 'test':
         app.config.from_object(TestConfig)
