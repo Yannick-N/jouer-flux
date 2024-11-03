@@ -1,4 +1,5 @@
 import pytest
+from unittest import mock
 from app import create_app, db
 
 BASE_URL = '/api/v1/firewalls/'
@@ -14,6 +15,11 @@ def app():
 @pytest.fixture
 def client(app):
     return app.test_client()
+
+@pytest.fixture(autouse=True)
+def mock_role_required():
+    with mock.patch('app.utils.decorators.role_required', lambda role: lambda f: f):
+        yield
 
 def test_create_firewall(client):
     response = client.post(BASE_URL, json={
