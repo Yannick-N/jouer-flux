@@ -1,6 +1,7 @@
 import os
 
 from flask import Flask
+from flasgger import Swagger
 from flask_sqlalchemy import SQLAlchemy
 from flask_security import Security, SQLAlchemyUserDatastore
 from flask_jwt_extended import JWTManager
@@ -19,6 +20,7 @@ def create_app(config_name=None):
         config_name = os.getenv('FLASK_ENV', 'prod')
 
     app = Flask(__name__)
+    swagger = Swagger(app)
 
     if config_name == 'test':
         app.config.from_object(TestConfig)
@@ -33,6 +35,9 @@ def create_app(config_name=None):
     Security(app, user_datastore)
 
     with app.app_context():
+        from .models.firewall import Firewall
+        from .models.policy import Policy
+        from .models.rule import Rule
         db.create_all() 
         if not user_datastore.find_role("admin"):
             user_datastore.create_role(name="admin", description="Admin Role")
