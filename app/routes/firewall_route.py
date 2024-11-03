@@ -2,12 +2,14 @@ from flask import Blueprint, jsonify, request
 from marshmallow import ValidationError
 from app.schemas.firewall_schema import FirewallSchema
 from app.services.firewall_service import create_firewall, get_firewalls, get_firewall, update_firewall, delete_firewall
+from app.utils.decorators import role_required
 
 firewall_schema = FirewallSchema()
 
 firewall_bp = Blueprint('firewall', __name__)
 
 @firewall_bp.route('/', methods=['POST'])
+@role_required('admin')
 def handle_create_firewall():
     try:
         validated_data = firewall_schema.load(request.get_json())
@@ -37,6 +39,7 @@ def handle_get_firewall(id):
         return jsonify({"error": str(e)}), 500
     
 @firewall_bp.route('/<int:id>', methods=['POST'])
+@role_required('admin')
 def handle_update_firewall(id):
     try:
         firewall_updated = update_firewall(id, request.get_json())
@@ -48,6 +51,7 @@ def handle_update_firewall(id):
     
 
 @firewall_bp.route('/<int:id>', methods=['DELETE'])
+@role_required('admin')
 def handle_delete_firewall(id):
     try:
         delete_firewall(id)

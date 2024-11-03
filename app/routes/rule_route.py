@@ -2,12 +2,14 @@ from flask import Blueprint, jsonify, request
 from marshmallow import ValidationError
 from app.schemas.rule_schema import RuleSchema
 from app.services.rule_service import create_rule, get_rules_of_policy, get_rule, update_rule, delete_rule
+from app.utils.decorators import role_required
 
 rule_schema = RuleSchema()
 
 rule_bp = Blueprint('rule', __name__)
 
 @rule_bp.route('/<int:firewall_id>/policies/<int:policy_id>/rules', methods=['POST'])
+@role_required('admin')
 def handle_create_rule(firewall_id, policy_id):
     try:
         validated_data = rule_schema.load(request.get_json())
@@ -39,6 +41,7 @@ def get_rule_route(firewall_id, policy_id, rule_id):
         return jsonify({'error': str(e)}), 404 
 
 @rule_bp.route('/<int:firewall_id>/policies/<int:policy_id>/rules/<int:rule_id>', methods=['POST'])
+@role_required('admin')
 def handle_update_rule(firewall_id, policy_id, rule_id):
     try:
         validated_data = rule_schema.load(request.get_json())
@@ -53,6 +56,7 @@ def handle_update_rule(firewall_id, policy_id, rule_id):
         return jsonify({"error": str(e)}), 500
 
 @rule_bp.route('/<int:firewall_id>/policies/<int:policy_id>/rules/<int:rule_id>', methods=['DELETE'])
+@role_required('admin')
 def handle_delete_rule(firewall_id, policy_id, rule_id):
     try:
         delete_rule(rule_id)
