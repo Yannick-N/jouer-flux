@@ -69,7 +69,7 @@ def test_update_policy(client):
     })
     policy_id = response.get_json()['id']
     
-    response = client.post(f'{BASE_URL}{firewall_id}/policies/{policy_id}', json={
+    response = client.put(f'{BASE_URL}{firewall_id}/policies/{policy_id}', json={
         'name': 'Updated Policy',
         'status': 'inactive'
     })

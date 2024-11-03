@@ -63,7 +63,6 @@ def test_get_rule(client):
     rule_id = response.get_json()['id']
 
     response = client.get(f'{BASE_URL}{firewall_id}/policies/{policy_id}/rules/{rule_id}')
-    print(f"RESPONSE =>> {response.get_data()}")
     assert response.status_code == 200
     data = response.get_json()
     assert data['id'] == rule_id
@@ -79,12 +78,15 @@ def test_update_rule(client):
         'destination_ip': '10.0.0.5',
         'protocol': 'TCP'
     })
+    print(response.get_data())
+
     rule_id = response.get_json()['id']
 
-    response = client.post(f'{BASE_URL}{firewall_id}/policies/{policy_id}/rules/{rule_id}', json={
+    response = client.put(f'{BASE_URL}{firewall_id}/policies/{policy_id}/rules/{rule_id}', json={
         'destination_ip': '10.0.0.10',
         'protocol': 'ICMP'
     })
+    
     assert response.status_code == 200
     data = response.get_json()
     assert data['destination_ip'] == '10.0.0.10'

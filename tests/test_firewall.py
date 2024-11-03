@@ -54,7 +54,7 @@ def test_update_firewall(client):
     })
     firewall_id = response.get_json()['id']
     
-    response = client.post(f'{BASE_URL}{firewall_id}', json={
+    response = client.put(f'{BASE_URL}{firewall_id}', json={
         'name': 'Updated Firewall',
         'description': 'Updated description',
         'ip_address': '192.168.1.2'
