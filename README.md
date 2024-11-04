@@ -4,12 +4,14 @@ JouerFlux is a Flask-based application designed to manage firewalls, filtering p
 
 ## Table of Contents
 
+- [Continuous Integration](#continuous-integration)
 - [Features](#features)
 - [Architecture](#architecture)
 - [Prerequisites](#prerequisites)
 - [Running the Application](#running-the-application)
-- [Running Tests](#running-tests)
 - [API Endpoints](#api-endpoints)
+- [In-Depth Code Overview](#in-depth-code-overview)
+
 
 ## Continuous Integration
 
@@ -58,27 +60,47 @@ The application follows a modular structure:
     ├── test_firewall.py
     ├── test_policy.py
     └── test_rule.py
-.env                  # Environment variables
-config.py            # Configuration settings
-docker-compose.yml    # Docker Compose configuration
-Dockerfile            # Dockerfile for building the image
-run.py               # Entry point for running the application
+.env                    # Environment variables
+config.py               # Configuration databases settings
+docker-compose.yml      # Docker Compose configuration
+Dockerfile              # Dockerfile for building the image
+run.py                  # Entry point for running the application
 ```
 
 ### Prerequisites
 
 Ensure that you have Python 3.9 and `pip` installed on your system.
 
+These steps are only necessary for a local setup. For instructions on running the project with Docker and accessing the documentation, please refer to the [Running the Application](#running-the-application) section below.
+
 1. Clone the repository:
-    ```
+    ```bash
     git clone https://github.com/Yannick-N/jouer-flux.git
     cd jouer-flux
     ```
 
-2. Install Flask and other dependencies:
+2. Set up a virtual environment and activate it:
+    ```bash
+    # Create a virtual environment
+    python3 -m venv venv
+
+    # Activate the virtual environment
+    # On macOS and Linux
+    source venv/bin/activate
+    # On Windows
+    venv\Scripts\activate
     ```
+
+3. Install Flask and other dependencies:
+    ```bash
     pip install -r requirements.txt
     ```
+
+4. Run the tests with `pytest` to verify the setup:
+    ```bash
+    pytest
+    ```
+This will execute all the unit tests in the `/tests` directory, ensuring that each component of the application is working correctly.
 
 ## Running the Application
 
@@ -94,23 +116,7 @@ Ensure that you have Python 3.9 and `pip` installed on your system.
 
 In the user API, there is a default admin user available for login. To authenticate and obtain an access token, send a login request to the `/api/v1/users/login` endpoint with the default admin credentials. Once you receive the access token, you can use it to authorize your API requests.
 
-To use the token in the Swagger UI, click on the “Authorize” button located in the top right corner. In the input field, WRITE `Bearer {token}`. This will grant you access to the protected API endpoints.
-
-## Running Tests
-
-To run tests, use `pytest`:
-
-1. Install `pytest` if it's not already installed:
-    ```
-    pip install pytest
-    ```
-
-2. Run the tests:
-    ```
-    pytest
-    ```
-
-This will execute all the unit tests in the `/tests` directory, ensuring that each component of the application is working correctly.
+To use the token in the Swagger UI, click on the “Authorize” button located in the top right corner. In the input field, WRITE by hand `Bearer {token}`. This will grant you access to the protected API endpoints.
 
 ## API Endpoints
 
@@ -143,3 +149,17 @@ Here are the main API endpoints:
 - **DELETE** `/api/v1/users/{id}` - Delete a user by ID.
 - **GET** `/api/v1/users/{id}` - Get a user by ID.
 - **PUT** `/api/v1/users/{id}` - Update a user by ID.
+
+## In-Depth Code Overview
+
+### Schema Usage for API Input Validation
+
+To maintain consistency and reliability in API requests, each endpoint in JouerFlux utilizes schemas to validate input data. This approach ensures that data sent to the API follows the correct structure and format, which helps prevent invalid data from reaching the database or causing unexpected errors. The schema files are located in the `/schemas` directory and define rules for each entity—`firewall`, `policy`, `rule`, and `user`. Each schema is responsible for verifying fields such as required attributes, data types, and constraints before the data is processed by the service layer.
+
+For instance, the `firewall_schema.py` defines the structure for a firewall entity, specifying required fields (e.g., name, IP address) and valid data types. When a user submits a request to create or update a firewall, the schema automatically validates the input against these rules. If the input data fails validation, the API returns an error message, detailing which fields were incorrect, providing immediate feedback to the user.
+
+### Mocking the Admin Role for API Authorization Testing
+
+As the development of JouerFlux progressed, we implemented role-based authorization to restrict access to specific endpoints. However, testing the functionality of each API route while simultaneously implementing authorization posed a challenge. To address this, a mock admin role was temporarily introduced during testing. This allowed tests to simulate admin access without needing full implementation of the authentication and authorization workflows.
+
+With this approach, test cases could interact with protected endpoints seamlessly. This mock admin setup made it possible to validate the core functionalities of the application (such as CRUD operations on firewalls, policies, and rules) without the added complexity of enforcing authorization checks. Once authorization was fully integrated, we updated tests to handle real authentication scenarios, ensuring secure access control for each endpoint.
